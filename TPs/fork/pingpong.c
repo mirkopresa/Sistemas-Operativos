@@ -57,7 +57,7 @@ int main()
         read(fd_padre_hijo[0], &entero_leido, sizeof(long));
         printf("getpid me devuelve: %d\n", getpid());
         printf("getppid me devuelve: %d\n", getppid());
-        printf("Recibo valor %d via fd = %d\n", entero_leido, fd_padre_hijo[0]);
+        printf("Recibo valor %ld via fd = %d\n", entero_leido, fd_padre_hijo[0]);
         printf("Reenvio valor en fd = %d y termino\n\n", fd_hijo_padre[1]);
         write(fd_hijo_padre[1], &entero_leido, sizeof(long));
 
