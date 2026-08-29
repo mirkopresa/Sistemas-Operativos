@@ -10,7 +10,7 @@ void manejo_error_fork(pid_t id_proceso)
     if (id_proceso < 0)
     {
         perror("Error al iniciar el fork");
-        exit(0);
+        exit(-1);
     }
 }
 
@@ -19,7 +19,7 @@ void manejo_error_pipe(int error)
     if (error < 0)
     {
         perror("Error al crear un pipe");
-        exit(0);
+        exit(-1);
     }
 }
 
@@ -28,7 +28,7 @@ void manejo_error_lectura_escritura(ssize_t resultado)
     if (resultado < 0)
     {
         perror("Error al leer/escribir un numero");
-        exit(0);
+        exit(-1);
     }
 }
 
@@ -40,13 +40,12 @@ void filtrado_recursivo(int pipe_lectura, int nuevo_pipe_escritura, int leido_an
     resultado = read(pipe_lectura, &leido_nuevo, sizeof(int));
     manejo_error_lectura_escritura(resultado);
 
+    // Caso base: no quedan mas numeros en el pipe
     if (resultado == 0)
     {
-        close(pipe_lectura);
-        close(nuevo_pipe_escritura);
-        wait(NULL);
         return;
     }
+
     if (leido_nuevo % leido_anterior != 0)
     {
         resultado = write(nuevo_pipe_escritura, &leido_nuevo, sizeof(int));
@@ -70,6 +69,7 @@ void filtrado(int pipe_lectura)
     }
 
     printf("primo %d\n", leido);
+    fflush(stdout);
 
     int nuevo_pipe[2];
     int error;
@@ -84,6 +84,9 @@ void filtrado(int pipe_lectura)
     {
         close(nuevo_pipe[0]);
         filtrado_recursivo(pipe_lectura, nuevo_pipe[1], leido);
+        close(pipe_lectura);
+        close(nuevo_pipe[1]);
+        wait(NULL);
     }
     else
     {
@@ -125,21 +128,21 @@ void primes(int n)
 
 int main(int argc, char *argv[])
 {
-    if (argc < 2 || argc > 2)
+    if (argc != 2)
     {
-        perror("No se envio la cantidad correcta de parametros.");
-        exit(0);
+        perror("No se envio la cantidad correcta (2) de parametros.");
+        exit(-1);
     }
     int n = atoi(argv[1]);
     if (n == 0)
     {
         perror("Error al convertir de string a numero.");
-        exit(0);
+        exit(-1);
     }
     if (n < 2)
     {
         perror("El numero tiene que ser mayor o igual a 2.");
-        exit(0);
+        exit(-1);
     }
     primes(n);
     return 0;
